@@ -1,5 +1,5 @@
 build:	## Generate the website from the markdown and config file in dist
-		hugo
+		hugo -d dist/
 
 clean:	## Clean up the content in dist
 		rm -r dist/*
