@@ -4,15 +4,13 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 3 * * *"
 
 jobs:
   module3_task0:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
         uses: actions/checkout@v3
-      - name: cd in to correct directory
         run: |
           cd module3_task0
           make help
