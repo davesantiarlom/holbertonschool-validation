@@ -1,13 +1,12 @@
-build: ##Build your website structure
-	hugo -s . -d dist/
+help: ## Show help command
+	@sed -ne '/@sed/!s/## //p' Makefile
 
-clean: ##Clean content of dist directory
-	cd dist && rm -rf *
+build:  ## Create Website
+	@hugo
 
-post: ##Create new post for your website
-	hugo new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title:"$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+clean:  ## Delete content of dist folder
+	@rm -rf dist/*
 
-help: ##Show this help usage
-	cat README.md
-
+post:  ## Create a post
+	@hugo new ./content/posts/$(POST_NAME).md
+	@sed -i '/title:*/c\title: "$(POST_TITLE)"' ./content/posts/$(POST_NAME).md
