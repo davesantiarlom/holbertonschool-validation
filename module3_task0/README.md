@@ -1,18 +1,13 @@
-<h1>Module 1: Introduction to DevOps: Automate Everything to Focus on What Really Matters</h1>
-<h2>By Dylan Anderson</h2>
-
-# Validation
-
-DevOps introduction using goHugo
+# Module 1: Introduction to DevOps: Automate Everything to Focus on What Really Matters
 
 ## Prerequisites
-
-- GoHugo v0.80+
-- goLang
+-   Install Go-Hugo
+-   Not allow to use Git submodules
+-   The theme ananke is installed
+-   Makefile present
 
 ## Lifecycle
-
-- build
-- clean
-- post
-- help
+-   build: For generae the website
+-   clean: Cleanup the content
+-   post: Create a new blog post
+-   help: Print out the list of targets' usage

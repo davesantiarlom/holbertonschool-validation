@@ -1,13 +1,12 @@
-build: ## Builds a website using hugo with current config in config.toml
-	hugo
+build:	## Generate the website from the markdown and config file in dist
+		hugo
 
-post: ## Creates a new post using env vars POST_TITLE and POST_NAME
-	hugo new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+clean:	## Clean up the content in dist
+		rm -r dist/*
 
-clean: ## Removes content from dist directory
-	rm -rf dist/*
+post:	## Create a new post whose file name and title from the Postname and Post title
+		hugo new posts/$(POST_NAME).md
+		sed -i 's/title: .*/title:"$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
-.SILENT:
-help: ## Displays helpful information for Makefile commands
-	cat Makefile | grep '##' | tr -d '##' | head -n -1
+help:	## Display the documentation of all targets
+		@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
