@@ -11,9 +11,5 @@ jobs:
   module3_task0:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone and check out repository
-        uses: actions/checkout@v3
-      - name: position self in correct directory
-        run: |
-          cd module3_task0
-          make help
+      - uses: actions/checkout@v3
+      - run: cd module3_task0 & make help
