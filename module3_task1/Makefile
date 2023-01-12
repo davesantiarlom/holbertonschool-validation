@@ -1,17 +1,31 @@
-# Implement the next steps for the actual Go-Hugo website's source code
-build: ## Generate the website from markdown and config files in the 'dist/' folder
-	@hugo
+# Define variables
+Publish=hugo
+SHELLCHECK=shellcheck
 
-clean: ## Cleanup the content of the 'dist/' folder
-	@rm -Rf dist/*
+build: ## Builds a new website
+	$(Publish)
 
-post: ## Create a new blog post using POST_TITLE and POST_NAME env variables
-	@rm -Rf content/posts/$(POST_NAME).md
-	@hugo new posts/$(POST_NAME).md
-	@sed -i 's/title:.*/title: $(POST_TITLE)/' content/posts/$(POST_NAME).md
-	@sed -i 's/draft:.*/draft: "false"/' content/posts/$(POST_NAME).md
+clean: ## Remove all files from folder dist
+	rm -r dist/*
 
-help: ## Show this help usage
-	@echo "Usage: make <command>"
-	@echo "-----"
-	@cat Makefile | grep "^\w*:.*##.*" | sed 's/## //'
+post: ## Create new post and using the sed command to modify the contents of a file.
+	$(Publish) new posts/$(POST_NAME).md
+	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+
+lint: ## shellcheck setup
+	$(SHELLCHECK) setup.sh >/dev/null 2>&1 || echo "Lint Failed"
+	
+integration-tests: ## server and check the localhost
+	hugo
+	ls dist/
+	
+unit-tests: ## Runs different makefile recipes
+	make POST_TITLE='TEST' POST_NAME='this-is-a-test' post
+	make build
+	make clean
+
+validate: ## Tests dir
+	pwd
+		
+help: ## Display the list of targets and their usage.
+	cat Makefile | grep '##' | tr -d '##' | head -n -1
