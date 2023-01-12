@@ -2,23 +2,22 @@ name: module3_task1
 
 on:
   push:
-    paths:
-      - 'module3_task1/**'
+    branches: [main]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '30 00 * * *'
 
 jobs:
   build:
+
     runs-on: ubuntu-18.04
 
     steps:
-      - name: Clone the repository
+      - name: "Checkout" # Download code from the repository
         uses: actions/checkout@v3
-      - name: Execute the script setup.sh
+
+      - name: "Run bash script"
         run: |
-          cd module3_task1/
-          ./setup.sh
-      - name: Build the application
+          cd module3_task1 && ./setup.sh
+      - name: "Run make build" # Execute the command make build
         run: |
-          cd module3_task1/
-          make build
+          cd module3_task1 && make build
