@@ -1,36 +1,48 @@
 ---
 name: module3_task2
-"on":
+on:
   push:
     branches:
       - main
+      - master
   schedule:
-    - cron: '0 0 * * *'
-
-permissions: read-all
+    - cron: "0 0 * * *"
 
 jobs:
-  builds:
-    name: job1
+  module3_task2:
     runs-on: ubuntu-18.04
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: install hugo
-        run: |
-          cd module3_task3 && ./setup.sh
-      - name: install markdown
-        run: npm install -g markdownlint-cli
+      - name: Clone the repository
+        uses: actions/checkout@v3
 
-      - name: Validate Makefile help
+      - name: Run script to setup Hugo
         run: |
-          cd module3_task2
+          cd module3_task2/
+          ./setup.sh
+        shell: bash
+
+      - name: Build and create package
+        run: |
+          cd module3_task2/
           make lint
+
+      - name: Build
+        run: |
+          cd module3_task2/
           make build
-          make package
-          make unit-tests
-          make integration-tests
+
+      - name: Run tests
+        run: |
+          cd module3_task2/
+          make build
           make validate
+          make integration-tests
+          make unit-tests
+          make clean
+
+      - name: Archiving package
+        if: ${{ success()}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: upload-package
+          path: module3_task2/awesome-website.zip

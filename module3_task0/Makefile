@@ -1,12 +1,13 @@
-help: ## Show help command
-	@sed -ne '/@sed/!s/## //p' Makefile
+build: ## Builds a website using hugo with current config in config.toml
+	hugo
 
-build:  ## Create Website
-	@hugo
+post: ## Creates a new post using env vars POST_TITLE and POST_NAME
+	hugo new posts/$(POST_NAME).md
+	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
-clean:  ## Delete content of dist folder
-	@rm -rf dist/*
+clean: ## Removes content from dist directory
+	rm -rf dist/*
 
-post:  ## Create a post
-	@hugo new ./content/posts/$(POST_NAME).md
-	@sed -i '/title:*/c\title: "$(POST_TITLE)"' ./content/posts/$(POST_NAME).md
+.SILENT:
+help: ## Displays helpful information for Makefile commands
+	cat Makefile | grep '##' | tr -d '##' | head -n -1
