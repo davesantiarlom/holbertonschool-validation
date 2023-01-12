@@ -1,15 +1,13 @@
-## Makefile for Go-Hugo website
+build: ##Build your website structure
+	hugo -s . -d dist/
 
-build:## Build the website
-	@hugo
+clean: ##Clean content of dist directory
+	cd dist && rm -rf *
 
-clean: ## Clean up the build directory
-	rm -rf dist/*
-
-post: ## Create a new blog post
+post: ##Create new post for your website
 	hugo new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+	sed -i 's/title: .*/title:"$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
-help: ## usage: make help
-	@echo "Usage:"
-	cat Makefile | grep '##' | tr -d '##'
+help: ##Show this help usage
+	cat README.md
+

@@ -1,6 +1,7 @@
 ---
 title: "Welcome to Awesome Inc."
-date: 2023-01-05T13:48:16-03:00
-draft: true
+date: 2023-01-03T12:16:28+01:00
+draft: false
 ---
 
+Welcome to Awesome Inc., where we do awesome things every day!

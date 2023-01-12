@@ -1,9 +1,8 @@
 ## Prerequisites
-   - GNU Make in version 3.81+
-   - Git (command line) in version 2+
-   - Go Hugo v0.80+
+
 ## Lifecycle
-   - make build
-   - make clean
-   - make post
-   - make help
+build: Build your website structure
+clean: Clean content of dist directory
+post: Create new post for your website
+
+help: Show this help usage
