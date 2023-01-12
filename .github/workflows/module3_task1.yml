@@ -1,26 +1,24 @@
 name: module3_task1
+
 on:
-  schedule:
-    - cron: "0 0 * * *"
   push:
+    paths:
+      - 'module3_task1/**'
+  schedule:
+    - cron: '0 0 * * *'
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-18.04
+
     steps:
-      - name: Clone the repo
+      - name: Clone the repository
         uses: actions/checkout@v3
-      - name: Run setup.sh
-        working-directory: module3_task1
-        run: sudo ./setup.sh
-      - name: Build the site
-        working-directory: module3_task1
-        run: make build
-      - name: Create a post
-        working-directory: module3_task1
-        run: make post POST_NAME=test POST_TITLE=thisisatest
-      - name: Call for help :3
-        working-directory: module3_task1
-        run: make help
-      - name: Clean the dist folder
-        working-directory: module3_task1
-        run: make clean
+      - name: Execute the script setup.sh
+        run: |
+          cd module3_task1/
+          ./setup.sh
+      - name: Build the application
+        run: |
+          cd module3_task1/
+          make build
