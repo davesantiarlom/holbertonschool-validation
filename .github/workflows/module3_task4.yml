@@ -29,6 +29,7 @@ jobs:
           make unit-tests -C module3_task4/
           make integration-tests -C module3_task4/
           make validate -C module3_task4/
+
       - uses: actions/upload-artifact@v3
         with:
           name: Archive awesome-website.zip as artifact
