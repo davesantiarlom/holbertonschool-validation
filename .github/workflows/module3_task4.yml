@@ -1,56 +1,52 @@
 ---
-env:
-  GH_TOKEN: ${{ github.token }}
 name: module3_task4
-"on":
+on:
   push:
-    tags: "1.0.1"
-    branches: [master]
+    branches: [main, master]
   schedule:
     - cron: '0 0 * * *'
   pull_request:
-    types: [opened, reopened, synchronize]
-
-permissions: read-all
+    types: [opened, reopened, edited, ready_for_review]
 
 jobs:
-  builds:
-    permissions: write-all
-    name: job1
+  module3_task4:
     runs-on: ubuntu-18.04
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: install hugo
-        run: cd module3_task4 && ./setup.sh
-      - name: install markdown
-        run: npm install -g markdownlint-cli
-      - name: Validate Makefile help
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Hugo
         run: |
-          cd module3_task2
+          cd module3_task4/
+          ./setup.sh
+      - name: lint
+        run: |
+          cd module3_task4/
           make lint
+      - name: build
+        run: |
+          cd module3_task4/
           make build
-          make package
-          make unit-tests
+      - name: post
+        run: |
+          cd module3_task4/
+          make POST_TITLE="Test Title" POST_NAME="Test-name" post
+      - name: Integration tests
+        run: |
+          cd module3_task4/
           make integration-tests
+          make unit-tests
           make validate
+          make package
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/1.0.1')
         with:
+          tag_name: 1.0.1
           files: |
-            awesome-website.zip
-            DEPLOY.md
-          body: |
-            # First project
-            What is in the archive and how to unarchive it? zip
-            What are the commands to start and stop the application? tag
-            How to customize where the application logs are written?
-            How to verify that the application is running (healthcheck)?
-      - run: gh release create v1.0.1 --title "v1.0.1" --notes DEPLOY.md\
-            2>/dev/null || echo "OK"
-      - name: release drafter
-        uses: release-drafter/release-drafter@v5
+            module3_task4/awesome-website.zip
+            module3_task4/DEPLOY.md
+      - name: archive build
+        if: ${{ success()}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: upload-package
+          path: module3_task4/awesome-website.zip
