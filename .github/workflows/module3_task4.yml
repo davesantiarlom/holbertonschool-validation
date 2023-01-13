@@ -2,12 +2,10 @@
 name: module3_task4
 on:
   schedule:
-    # workflow triggered each day
     - cron: '30 5 * * *'
   push:
-    # trigger each push event
     branches:
-      - main
+      - master
   pull_request:
     types: [opened, reopened]
 
