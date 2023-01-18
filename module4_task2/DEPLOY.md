@@ -1,25 +1,24 @@
-# Deployment Document
+# DEPLOYMENT
 
-- What is in the archive and how to unarchive it?
+## What is in the archive and how to unarchive it
 
-- It is a compressed file that is the awesome-api binary and is 'dist directory'.
+The archive contains the latest build and the api binary.
+The archive can be found under either in uploads or releases if a tags is used v1.0.0
 
-- Syntax to unzip the zip package
-  
-  Run unzip awesome-website.zip
+### To unarchive the package
 
-- How to verify the version
-  
-  Run git tag
+Run the command:
+`unzip awesome-website.zip`
 
-- What are the commands to start and stop the application?
+## What are the commands to start and stop the application
 
-  - Use Hugo server, sintax type hugo server
+To run the application use:
+`hugo server`
 
-- How to customize where the application logs are written?
+## How to customise where the logs are written
 
-- I do not know yet
+Logs are created by the github actions and stored in the respective runner
 
-- How to “quickly” verify that the application is running (healthcheck)?
+## How to quickly check the application is running
 
-- Check it out on local host [http://localhost:1313]
+Use the url in modern browser: <http://localhost:1313>

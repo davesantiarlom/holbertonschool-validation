@@ -1,58 +1,65 @@
-## Declare variables for used commands
 HUGO=hugo
+RM=rm -rf
 SHELLCHECK=shellcheck
-export PATH
+YAMLLINT=yamllint
+YQ=yq
+MARKDOWN=markdownlint
 
-## Declare a list of phony targets
-.PHONY: build build-docker build-tools test
+build-docker:## Build the Docker image
+	docker build -t awesome:build -f build/Dockerfile .
 
+docker-tests:## Build the Docker image
+	docker build -t awesome:build -f build/Dockerfile .
 
-build:## Installhugo package, Run the hugo, Create a file
-	$(HUGO)
-	touch awesome-api
+build: build-docker ## Build the website and api
+	docker run --rm -v $(PWD):/app -w /app awesome:build make build-website
+	docker run --rm -v $(PWD):/app -w /app awesome:build go build -o awesome-api
 
-build-docker:## Build a Docker image for the build directory
-	docker build -t "awesome:build" ./build --no-cache
+build-website:## Build the Docker image
+	hugo --source . --destination dist
 
-build-tools:## Install the hugo package and tools
-	sudo apt install ./hugo.deb
-
-test:## Run the clean target inside a Docker container , execute hugo and ls ./dist
-	docker run awesome:build sh -c "make clean || echo 'Lint Failed'"
-	docker run awesome:build sh -c "hugo; ls ./dist/*"
-
-clean:## Remove all files in the dist directory
-	rm -rf ./dist*
-
-post:## Create a new post and set the title
+post: ## Creates a new post with the title changed to the ENV value.
 	$(HUGO) new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+	$(YQ) eval '.title = "$(POST_TITLE)"' ./content/posts/$(POST_NAME).md
 
-lint: ## Check and clean your Dockerfile with Hadolint
+clean: ## Remove all files from target folder
+	$(RM) dist/*
+
+lint: ## Lints the shell file and run yamllint on success.
 	hadolint ./build/Dockerfile
+	
 
-markdownlint: ## Run the markdownlint tool on the README.md and DEPLOY.md files
-	markdownlint README.md DEPLOY.md
+yamllint: ## Yamllint github workflow.
+	$(YAMLLINT) ./github-workflow.yml --no-warnings >/dev/null 2>&1 && echo OK
+	$(YAMLLINT) ./release_drafter.yml --no-warnings >/dev/null 2>&1 && echo OK
+	$(YQ) eval '.jobs.*.steps.[].name' ./github-workflow.yml | wc -l
+	$(YQ) eval '.jobs.*.steps.[].run' ./github-workflow.yml | grep -q 'make lint' && echo OK
+	$(YQ) eval '.jobs.*.steps.[].run' ./github-workflow.yml | grep -q 'make integration-test'
 
-shellcheck:## Run the shellcheck tool on the setup.sh script
-	$(SHELLCHECK) setup.sh >/dev/null 2>&1 || echo "Lint Failed"
+markdownlint:## Build the Docker image
+	$(MARKDOWN) README.md
+	$(MARKDOWN) DEPLOY.md
 
-integration-tests:## Create a coverage-integrations.out file
+integration-tests: ## Spin up a server and check the localhost url
+	docker run awesome:build sh -c "hugo; make _clean; make _integration-tests;"
+	make _integration-tests;
+
+_integration-tests:## Build the Docker image
 	touch coverage-integrations.out
 
-unit-tests:## Create a coverage-units.out file
+unit-tests: ## Runs different makefile recipes
+	docker run awesome:build sh -c "hugo; make _clean; make _unit-tests;"
 	touch coverage-units.out
+	
 
-validate:## List the contents of the dist directory
+validate: ## Tests ensure it is in correct dir
 	pwd
 
-package:## Build the site, Create a dist directory, Create zip archive the dist
+package: ## Creates a zip archive of the dist dir api binary.
 	make build
-	zip awesome-website.zip dist
+	zip awesome-website.zip dist/index.html
+	zip awesome-api.zip awesome-api
 
-docker-tests:  ## Docker Image Testing With Container Structure Tests
-	container-structure-test test --image awesome:build --config ./build/cst.yml
-
-help: ##Print all lines in the Makefile that contain "##"
-	
+.SILENT:
+help: ## Target check
 	cat Makefile | grep '##' | tr -d '##' | head -n -1
