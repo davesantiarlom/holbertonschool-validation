@@ -1,3 +1,4 @@
+## Declare variables for used commands
 HUGO=hugo
 RM=rm -rf
 SHELLCHECK=shellcheck
@@ -12,7 +13,7 @@ post: ## Creates a new post with the title changed to the ENV value.
 	$(HUGO) new posts/$(POST_NAME).md
 	sed -i '2s/.*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
-build-docker:
+build-docker: ## build-docker
 	docker build -t awesome:build -f docker/Dockerfile .
 
 _awesome:
