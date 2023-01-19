@@ -39,6 +39,7 @@ It performs the following actions:
 - Position yourself in the correct directory and execute the command `make help`
 to validate that the Makefile is present and implements the help target check.
 - Validate the build-docker
+- docker-tests
 
 It is triggered when:
 
