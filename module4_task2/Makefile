@@ -19,6 +19,7 @@ build-docker: ## build-docker
 _awesome:
 	touch awesome-api
 
+## Declare a list of phony targets
 .PHONY:
 clean: ## Remove all files from target folder
 	docker run awesome:build sh -c "hugo; make _clean"
@@ -66,6 +67,10 @@ package: ## Creates a zip archive of the dist dir api binary.
 
 _zip:
 	zip awesome-website.zip dist/index.html
+
+docker-tests:  ## Docker Image Testing With Container Structure Tests
+	docker build -t "awesome:build" ./build --no-cache
+	container-structure-test test --image "awesome:build" --config ./build/cst.yml
 
 .SILENT:
 help: ## Target check
