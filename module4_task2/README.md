@@ -1,98 +1,118 @@
-# Module 1: Introduction to DevOps: Automate Everything to Focus on What Really Matters
+# DevOps: Automate Everything to Focus on What Really Matters
+
+## By Luke Hackett
 
 ## Learning Objectives
 
-* This project aims at showing use cases where a DevOps mindset is bringing value to a software project by automating it, which decreases the amount of manual work and increases the development speed. It focuses on why automation is useful and helps speeding a development lifecycle.
+This project aims at showing use cases where a DevOps mindset is bringing value
+ to a software project by automating it, which decreases the amount of manual
+ work and increases the development speed. It focuses on why automation is useful
+ and helps speeding a development lifecycle.
 
----
-Read
+After this project, you should be able to:
 
-Understand the value of automating tedious tasks
-Define a development lifecycle
-Automate shell-like tasks with Make, and/or shell script
-Be aware of tools dependencies and the value of reproducing environment
-Build static HTML website from Markdown code using Go-Hugo
+- Understand the value of automating tedious tasks
+- Define a development lifecycle
+- Automate shell-like tasks with Make, and/or shell script
+- Be aware of tools dependencies and the value of reproducing environment
+- Build static HTML website from Markdown code using Go-Hugo
 
----
 ## Prerequisites
 
-* The following elements are required In addition to the previous module (“Module 0: Linux Fundamentals, Code management with Git, GitHub and the GitFlow pattern”) prerequisites.
+- An HTML5-compliant web browser (Firefox, Chrome, Opera, Safari, Edge, etc.)
+- A free account on [GitHub](https://github.com/), referenced as `GitHub Handle`
+- A shell terminal with bash, zsh or ksh, including the standard Unix
+toolset (ls, cd, etc.)
+- [GNU](https://www.gnu.org/software/make/) Make in version 3.81+
+- Git (command line) in version 2+
+- [Go Hugo](https://gohugo.io/) v0.80+
+
+## Project State
+
+## Workflow
+
+The project state currently is using Github actions.
+
+It performs the following actions:
+
+- Clones the repo
+- Position yourself in the correct directory and execute the command `make help`
+to validate that the Makefile is present and implements the help target check.
+
+It is triggered when:
+
+- Each time there is new code pushed on your repository
+- Once a day
+
+## Build Workflow
+
+The actions performed at midnight and every time the repo is pushed is:
+
+- Clone the repo
+- Run setup.sh to download and install the missing packages
+- Lint the yaml and shell file
+- Make a build
+- Make a post
+- Run server and curl the website
+- Clean up the repo.
+
+## Draft release
+
+A new version is made on pull requests with a new tag.
+
+## Lifecycle
+
+### Planning
+
+The team is looking to move the internal wiki on to HUGO as the team is
+comfortable with it.
+
+### Requirements
+
+### To run
+
+- An HTML5-compliant web browser (Firefox, Chrome, Opera, Safari, Edge, etc.)
+- A free account on [GitHub](https://github.com/), referenced as `GitHub Handle`
+- A shell terminal with bash, zsh or ksh, including the standard Unix toolset
+(ls, cd, etc.)
+- [GNU](https://www.gnu.org/software/make/) Make in version 3.81+
+- Git (command line) in version 2+
+- [Go Hugo](https://gohugo.io/) v0.80+
 
 ---
-## Concepts
 
-### Shell terminal basics, using command lines:
-* Navigating in a Unix file-system
-* Understanding how stdin/stdout redirection and piping
-* Showing and searching the content of a text files
-* Defining and using Environment Variables
-* Adding command lines to your terminal using the apt-get package manager and/or with the PATH variable
-* Writing and executing a shell script
+### To Edit
 
-### Git with the command line (and also a graphical interface)
-* Retrieving or creating a repository
-* Manipulating changes locally with Git’s 3 steps process (workspace, staging, history)
-* Distributing changes history with remotes repositories
+- Your favourite IDE, emacs, vscode.
 
-### Make/Makefile usage:
-* Executing tasks through make targets
-* Default target and PHONY target
-* Makefile’s variables and macro syntax
+### Product Architecture
+
+### Developing the Product
+
+The program is generated uising the inbuilt functions provided by HUGO 0.80+.
+The Makefile is built to GNU Make v4.3
+Hugo 0.80+
+
+### Testing the Product
+
+### Deployment
+
+A release is created when a tag is supplied on commit
+
+## following make file use `make <command>`
 
 ---
-## Tooling
 
-* An HTML5-compliant web browser (Firefox, Chrome, Opera, Safari, Edge, etc.)
-* A free account on GitHub, referenced as <GitHub Handle>
-* A shell terminal with bash, zsh or ksh, including the standard Unix toolset (ls, cd, etc.) with:
-* .GNU Make in version 3.81+
-* .Git (command line) in version 2+
-* .Go Hugo v0.80+
-* The student needs to be able to spawn up a clean Ubuntu 18.04 system. Therefore Docker is recommended with NO prior knowledge.
-* A text editor or IDE (Integrated Development Editor) of your convenience (Visual Code, Notepad++, Vim, Emacs, IntelliJ, etc.)
-
-
-## Reference Readings
----
-Read|Read
----|---
-Go Hugo Quickstart | https://intranet.hbtn.io/rltoken/jQyxwX-NaGuIDMpbklREZQ
-Git SCM Book | https://intranet.hbtn.io/rltoken/KVwKi4WrASyHYE3BGnsbzg
-GNU Make Docs | https://intranet.hbtn.io/rltoken/YUo3ljJIf8QXZHL1gXPuEQ
-Use the theme “ananke” | https://intranet.hbtn.io/rltoken/SKy0HBhQWAtro1AlK8FVug
-Usage of Git Submodules | https://intranet.hbtn.io/rltoken/lidgCKLmLzxH1t97w6IaSA
-Website by following hugo step | https://intranet.hbtn.io/rltoken/nw0c87DBiUJyagTXw9z4Ig
-Markdown syntax which describes to build the website (Go-Hugo, Make, etc.) | https://intranet.hbtn.io/rltoken/lj-Y4rR5PAyWjbn6z39_QA
-
-##  Development Lifecycle with Makefile
-## following make file use `make` <command>
----
-Files|Tasks
----|---
-Build | Generate the website from the markdown and configuration files in the directory dist/.
-Clean | Cleanup the content of the directory dist/
-Post | Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME.
-### Write a Makefile to implement these steps for the actual Go-Hugo website’s source code.
-
-# Workflow 
-* Build Workflow 
-
-# Target
-* unit-tests
-* package
-* lint
-* integration-tests
-* clean
-* build
-* build-docker
-* validate
-* post
-* docker-tests
-* help
-* lint: ## to execute a static analysis to lint this code.
-* @shellcheck setup.sh >/dev/null 2>&1 || echo "Lint Failed"
-* lint	Lints the shell script setup.sh and on success runs make yamllint and lints markdown FILES
-
-
-## Author
-Karren - [Github https://github.com/klmana ]
+| Command  | Tasks                                  |
+| -------- | ---------------------------------------|
+| build    | Generate the website from the markdown and configuration files in the directory dist/.|
+| clean    | Cleanup the content of the directory dist/|
+| p[ost     | Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME. |
+| lint     | Lints the shell script `setup.sh` and on success runs `make yamllint` and lints markdown FILES                |
+| yamllint | Lints the `github-workflow.yml` file.|
+| markdownlint | lints the `README.md` and `DEPLOY.md` files |
+| package | creates a zip archive of the the latest build and stores it under `awesome-website.zip` |
+|unit-tests| runs multiple make recipes. |
+| integration-tests | runs make post and make build |
+| validate | prints out the pwd |
+| Help     | Print out all build recipes. |

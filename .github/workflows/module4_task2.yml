@@ -6,41 +6,24 @@ on:
   schedule:
     - cron: '30 00 * * *'
   pull_request:
-    types: [opened, reopened, synchronize]
-
-permissions: read-all
+    types: [opened, reopened, edited, ready_for_review]
 
 jobs:
-  builds:
-    permissions: write-all
-    name: Testing Docker Images
+  module4_task2:
     runs-on: ubuntu-18.04
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: install tools
-        run: |
-          cd module4_task2
-          sudo ./setup.sh
-      - name: lint
-        run: |
-         cd module4_task2/
-         make lint && echo OK || echo FAILED
-      - name: Check Makefile
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: docker run
         run: |
           cd module4_task2/
-          make help
-          make build
           make build-docker
-          make package
-          echo ${{github.ref}}
-      - name: docker-tests
-        run: |
-         cd module4_task2/
-         make docker-tests && echo OK || echo FAILED
+          make lint
+          make clean
+          make build
+          make unit-tests
+          make integration-tests
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -54,17 +37,18 @@ jobs:
         with:
           name: upload-package
           path: module4_task2/awesome-website.zip
-      - name: deploy
-        uses: nwtgck/actions-netlify@v1.2
-        with:
-          publish-dir: './module4_task2/dist'
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: '🎉 Published on'
-          enable-pull-request-comment: true
-          enable-commit-comment: true
-          overwrites-pull-request-comment: true
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        timeout-minutes: 1
+
+      # - name: deploy
+      #   uses: nwtgck/actions-netlify@v1.2
+      #   with:
+      #     publish-dir: "./module4_task1/dist"
+      #     production-branch: master
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-message: "🎉 Published on"
+      #     enable-pull-request-comment: true
+      #     enable-commit-comment: true
+      #     overwrites-pull-request-comment: true
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      #   timeout-minutes: 1
