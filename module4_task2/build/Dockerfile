@@ -1,4 +1,7 @@
-FROM golang:1.15.8-buster
-COPY . /module4_task1
-RUN make /module4_task1
-CMD run /module4_task1/docker/Dockerfile
+# Dockerfile
+FROM golang:1.15.8-alpine
+
+WORKDIR /module4_task2
+COPY . .
+
+CMD ["/bin/sh"]
