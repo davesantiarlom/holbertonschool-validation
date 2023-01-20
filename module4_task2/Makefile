@@ -1,77 +1,59 @@
 ## Declare variables for used commands
 HUGO=hugo
-RM=rm -rf
 SHELLCHECK=shellcheck
-YAMLLINT=yamllint
-YQ=yq
-MARKDOWN=markdownlint
-
-build: ## Builds a new website
-	docker run awesome:build sh -c "hugo; ls ./dist/*"
-
-post: ## Creates a new post with the title changed to the ENV value.
-	$(HUGO) new posts/$(POST_NAME).md
-	sed -i '2s/.*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
-
-build-docker: ## build-docker
-	docker build -t awesome:build -f docker/Dockerfile .
-
-_awesome:
-	touch awesome-api
+export PATH
 
 ## Declare a list of phony targets
-.PHONY:
-clean: ## Remove all files from target folder
-	docker run awesome:build sh -c "hugo; make _clean"
+.PHONY: build build-docker build-tools test
 
-_clean:
-	$(RM) dist/*
 
-_cleancheck:
-	/bin/sh -c "ls ~/holbertonschool-validation/module4_task1/dist/;echo 'done'"
+build:## Installhugo package, Run the hugo, Create a file
+	$(HUGO)
+	touch awesome-api
 
-lint:
-	docker run awesome:build sh -c "make _shellcheck && make markdownlint || echo 'Lint Failed'"
+build-docker:## Build a Docker image for the build directory
+	docker build -t "awesome:build" ./build --no-cache
 
-_shellcheck:
-	$(SHELLCHECK) setup.sh >/dev/null 2>&1 && make yamllint || echo "Lint Failed"
+build-tools:## Install the hugo package and tools
+	sudo apt install ./hugo.deb
 
-yamllint: ## Yamllint github workflow.
-	$(YAMLLINT) ./github-workflow.yml >/dev/null 2>&1 && echo OK
-	$(YAMLLINT) ./release_drafter.yml >/dev/null 2>&1 && echo OK
-	$(YQ) eval '.jobs.*.steps.[].name' ./github-workflow.yml | wc -l
+test:## Run the clean target inside a Docker container , execute hugo and ls ./dist
+	docker run awesome:build sh -c "make clean || echo 'Lint Failed'"
+	docker run awesome:build sh -c "hugo; ls ./dist/*"
 
-markdownlint:
-	$(MARKDOWN) README.md
-	$(MARKDOWN) DEPLOY.md
+clean:## Remove all files in the dist directory
+	rm -rf ./dist*
 
-integration-tests: ## Spin up a server and check the localhost url
-	docker run awesome:build sh -c "hugo; make _clean; make _integration-tests;"
-	make _integration-tests;
+post:## Create a new post and set the title
+	$(HUGO) new posts/$(POST_NAME).md
+	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
-_integration-tests:
+lint: ## Check and clean your Dockerfile with Hadolint
+	hadolint ./build/Dockerfile
+
+markdownlint: ## Run the markdownlint tool on the README.md and DEPLOY.md files
+	markdownlint README.md DEPLOY.md
+
+shellcheck:## Run the shellcheck tool on the setup.sh script
+	$(SHELLCHECK) setup.sh >/dev/null 2>&1 || echo "Lint Failed"
+
+integration-tests:## Create a coverage-integrations.out file
 	touch coverage-integrations.out
 
-unit-tests: ## Runs different makefile recipes
-	docker run awesome:build sh -c "hugo; make _clean; make _unit-tests;"
-	make _unit-tests;
-
-_unit-tests:
+unit-tests:## Create a coverage-units.out file
 	touch coverage-units.out
 
-validate: ## Tests ensure it is in correct dir
+validate:## List the contents of the dist directory
 	pwd
 
-package: ## Creates a zip archive of the dist dir api binary.
-	docker run awesome:build sh -c "hugo; make _zip"
-
-_zip:
-	zip awesome-website.zip dist/index.html
+package:## Build the site, Create a dist directory, Create zip archive the dist
+	make build
+	zip awesome-website.zip dist
 
 docker-tests:  ## Docker Image Testing With Container Structure Tests
 	docker build -t "awesome:build" ./build --no-cache
 	container-structure-test test --image "awesome:build" --config ./build/cst.yml
 
-.SILENT:
-help: ## Target check
+help: ##Print all lines in the Makefile that contain "##"
+	
 	cat Makefile | grep '##' | tr -d '##' | head -n -1
