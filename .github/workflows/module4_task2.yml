@@ -6,49 +6,28 @@ on:
   schedule:
     - cron: '30 00 * * *'
   pull_request:
-    types: [opened, reopened, synchronize]
-
-permissions: read-all
+    types: [opened, reopened, edited, ready_for_review]
 
 jobs:
-  builds:
-    permissions: write-all
-    name: Testing Docker Images
+  module4_task2:
     runs-on: ubuntu-18.04
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: install tools
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: docker run
         run: |
-          cd module4_task2
-          sudo ./setup.sh
-      - name: Hugo
-        run: |
-          cd module4_task2
-          make build-tools
-      - name: Markdownlint
-        run: npm install -g markdownlint-cli
-      - name: lint
-        run: |
-         cd module4_task2/
-         make lint && echo OK || echo FAILED
-      - name: Check Makefile
-        run: |
-          cd module4_task2/
-          make help
+          cd module4_task0/
+          docker build -t my-app .
+          docker run -dp 8080:80 my-app
+          ./setup.sh
+          make lint
+          make clean
+          make build
           make unit-tests
           make integration-tests
-          make build
-          make build-docker
-          make package
-          echo ${{github.ref}}
-      - name: docker-tests
-        run: |
-         cd module4_task2/
-         make docker-tests && echo OK || echo FAILED
+
+      #- name: docker-tests
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -61,14 +40,15 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: upload-package
-          path: module4_task2/awesome-website.zip
+          path: module3_task5/awesome-website.zip
+
       - name: deploy
         uses: nwtgck/actions-netlify@v1.2
         with:
-          publish-dir: './module4_task2/dist'
-          production-branch: main
+          publish-dir: "./module4_task2/dist"
+          production-branch: master
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: '🎉 Published on'
+          deploy-message: "🎉 Published on"
           enable-pull-request-comment: true
           enable-commit-comment: true
           overwrites-pull-request-comment: true

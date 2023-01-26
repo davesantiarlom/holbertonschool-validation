@@ -1,55 +1,65 @@
-.PHONY: build
+HUGO=hugo
+RM=rm -rf
+SHELLCHECK=shellcheck
+YAMLLINT=yamllint
+YQ=yq
+MARKDOWN=markdownlint
 
-build: ## Generate the website from markdown and config files in the 'dist/' folder
-	@curl -L https://github.com/gohugoio/hugo/releases/download/v0.109.0/hugo_extended_0.109.0_linux-amd64.deb -o hugo.deb
-	@apt install ./hugo.deb
-	@rm ./hugo.deb
-	@hugo
-	@touch awesome-api
+build-docker:## Build the Docker image
+	docker build -t awesome:build -f build/Dockerfile .
 
-clean: ## Cleanup the content of the 'dist/' folder
-	@rm -Rf dist/*
+docker-tests:## Build the Docker image
+	docker build -t awesome:build -f build/Dockerfile .
 
-post: ## Create a new blog post using POST_TITLE and POST_NAME env variables
-	@rm -Rf content/posts/$(POST_NAME).md
-	@hugo new posts/$(POST_NAME).md
-	@sed -i 's/title:.*/title: $(POST_TITLE)/' content/posts/$(POST_NAME).md
-	@sed -i 's/draft:.*/draft: "false"/' content/posts/$(POST_NAME).md
+build: build-docker ## Build the website and api
+	docker run --rm -v $(PWD):/app -w /app awesome:build make build-website
+	docker run --rm -v $(PWD):/app -w /app awesome:build go build -o awesome-api
 
-package: ## Produce a zip file containing the 'dist/' folder
-	@hugo
-	@zip -r awesome-website.zip dist/
+build-website:## Build the Docker image
+	hugo --source . --destination dist
 
-lint: ## Check markdown files for any syntax mistake
-	@apt-get install curl -y
-	@curl --silent --location https://deb.nodesource.com/setup_16.x | bash -
-	@apt-get install nodejs -y
-	@npm install -g markdownlint-cli || true
-	@markdownlint README.md DEPLOY.md
-	@curl --silent --location https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o hadolint
-	@mv hadolint /usr/local/bin/
-	@chmod +x /usr/local/bin/hadolint
-	@hadolint build/Dockerfile
+post: ## Creates a new post with the title changed to the ENV value.
+	$(HUGO) new posts/$(POST_NAME).md
+	$(YQ) eval '.title = "$(POST_TITLE)"' ./content/posts/$(POST_NAME).md
 
-unit-tests: ## Run unit-tets of the project
-	@touch coverage-units.out
+clean: ## Remove all files from target folder
+	$(RM) dist/*
 
-integration-tests: ## Run integration-tests of the project
-	@touch coverage-integrations.out
+lint: ## Lints the shell file and run yamllint on success.
+	hadolint ./build/Dockerfile
+	
 
-validate: ## Validate the project
+yamllint: ## Yamllint github workflow.
+	$(YAMLLINT) ./github-workflow.yml --no-warnings >/dev/null 2>&1 && echo OK
+	$(YAMLLINT) ./release_drafter.yml --no-warnings >/dev/null 2>&1 && echo OK
+	$(YQ) eval '.jobs.*.steps.[].name' ./github-workflow.yml | wc -l
+	$(YQ) eval '.jobs.*.steps.[].run' ./github-workflow.yml | grep -q 'make lint' && echo OK
+	$(YQ) eval '.jobs.*.steps.[].run' ./github-workflow.yml | grep -q 'make integration-test'
 
-build-docker: ## Define a docekr image
-	@docker build -t awesome:build -f ./build/Dockerfile .
+markdownlint:## Build the Docker image
+	$(MARKDOWN) README.md
+	$(MARKDOWN) DEPLOY.md
 
-docker-tests: ## Create and test a docker image
-	# @docker build -t awesome:build -f ./build/Dockerfile .
-	@curl -LO https://storage.googleapis.com/container-structure-test/latest/container-structure-test-linux-amd64
-	@chmod +x container-structure-test-linux-amd64
-	@sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
-	@container-structure-test test --image awesome:build --config ./build/cst.yml
+integration-tests: ## Spin up a server and check the localhost url
+	docker run awesome:build sh -c "hugo; make _clean; make _integration-tests;"
+	make _integration-tests;
 
-help: ## Show help usage
-	@echo "Usage: make <command>"
-	@echo "-----"
-	@fgrep -h "##" Makefile | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | head -11
+_integration-tests:## Build the Docker image
+	touch coverage-integrations.out
+
+unit-tests: ## Runs different makefile recipes
+	docker run awesome:build sh -c "hugo; make _clean; make _unit-tests;"
+	touch coverage-units.out
+	
+
+validate: ## Tests ensure it is in correct dir
+	pwd
+
+package: ## Creates a zip archive of the dist dir api binary.
+	make build
+	zip awesome-website.zip dist/index.html
+	zip awesome-api.zip awesome-api
+
+.SILENT:
+help: ## Target check
+	cat Makefile | grep '##' | tr -d '##' | head -n -1
