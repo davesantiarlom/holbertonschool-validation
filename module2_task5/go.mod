@@ -1,8 +1,5 @@
-module github.comAngeiraT/awesome-api
+module github.com/rb5014/awesome-api
 
-go 1.13
+go 1.15
 
-require (
-	github.com/gorilla/mux v1.8.0
-	golang.org/x/tools/gopls v0.11.0 // indirect
-)
+require github.com/gorilla/mux v1.8.0

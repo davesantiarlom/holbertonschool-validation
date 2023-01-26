@@ -1,56 +1,61 @@
-# Implement the next steps for the actual Go-Hugo website's source code
-go-build:	## Builds the API binary file using go
-	go mod init github.com/Apinedas/awesome-api
-	go get github.com/gorilla/mux
-	go build
+# Help on commands
+help: ## Show this help
+	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
-hugo-build: check		## Builds a website using gohugo on the dist folder
-	hugo --destination ./dist
+# Build the website
+build: ## Build the go and the dist
+	make lint && go build
+	make check && make validate && hugo
 
-build:	## Builds all that is needed for website
-	make go-build
-	make hugo-build
-
-post: ## Creates a new post using env vars POST_TITLE and POST_NAME
-	hugo new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title: "$(POST_TITLE)"/' content/posts/$(POST_NAME).md
-
-clean: ##  Delete the binary awesome-api and the log file awesome-api.log
-	-make stop
-	-rm ./awesome-api awesome.log coverage* go* ./dist
-
-.SILENT:
-help: ## Displays helpful information for Makefile commands
-	echo "Usage: make <command>"
-	echo "-----"	
-	cat Makefile | grep '##' | tr -d '##'
- 
-run: ## Run the application in background by executing the binary awesome-api, and write logs
+# Run the website
+run: ## Run the website
+	make build
 	./awesome-api >./awesome.log 2>&1 &
 
-stop: ## Stop the application with the command kill
-	pkill awesome-api
+# Stop the website
+stop: ## Stop the website
+	pkill awesome-api || true
 
-test: ## You want to test it to ensure that it behaves as expected.
-	-make build
+# Clean up the project
+clean: ## Clean up the project
+	make stop
+	rm -f awesome* coverage*
+	rm -rf dist
+
+# Create a new blog post
+post: ## Create a new blog post
+	hugo new ./content/posts/$(POST_NAME).md
+	sed -i 's/title: .*/title: "$(POST_TITLE)"/g' ./content/posts/$(POST_NAME).md
+
+# Check the markdown files
+check: ## Check the markdown files
+	markdownlint ./content/posts/*
+	markdown-link-check ./content/posts/*
+
+# Validate the website
+validate: ## Validate the website
+	./W3C-Validator/w3c_validator.py ./dist/index.html || true
+
+# tests the files
+test: ## test the files
 	make unit-tests
 	make integration-tests
 
-lint: ## the linter reads the source code and detect common semantic errors.
-	golangci-lint run ./main.go
+# Create an archive file containing the dist/ directory
+package: ## Create an archive file containing the dist/ directory
+	hugo
+	zip -r awesome-website.zip dist/
 
-unit-tests: ##execute (successfully) the Golang unit tests
+# lint the main.go
+lint: ## lint the main.go
+	golangci-lint run
+	
+# unit-tests the main.go
+unit-tests: ## unit-tests the main.go
 	go test -v -short -coverprofile=coverage-units.out
 
-integration-tests: ##  execute (successfully) the Golang integration tests
+# integration-tests
+integration-tests: ## integration-tests
 	go test -v -coverprofile=coverage-integrations.out
-
-check:  ## Lints and check for dead links on markdowns using markdownlint-cli and markdown-link-check
-	markdownlint ./content/posts/*.md
-	markdown-link-check ./content/posts/*.md
-
-validate: ## Validates dist/index.html using W3C Hbtn validator
-	make build
-	-git clone https://github.com/holbertonschool/W3C-Validator.git
-	-./W3C-Validator/w3c_validator.py ./dist/index.html
-	-rm -rf ./W3C-Validator
+# Set default target
+.PHONY: build clean run stop test lint unit-tests integration-tests check validate package

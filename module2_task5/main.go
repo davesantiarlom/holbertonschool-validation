@@ -26,11 +26,8 @@ func setupRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	// When an HTTP GET request is received on the path /health, delegates to the function "HealthCheckHandler()"
-	r.HandleFunc("/health", HealthCheckHandler).Methods("GET")
-
-	// when an HTTP GET request is received on the path /hello
+	r.HandleFunc("/health", HealthCheckHandler).Methods("GET") // when an HTTP GET request is received on the path /hello
 	r.HandleFunc("/hello", HelloHandler).Methods("GET")
-
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./dist/")))
 
 	return r
@@ -67,8 +64,9 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set a default value if the name is empty
-	if name == "" {
-		name = "there"
+	if queryParams["name"] != nil && name == "" {
+		w.WriteHeader(400)
+		return
 	}
 
 	// Write the string "Hello <name>" into the response's body
