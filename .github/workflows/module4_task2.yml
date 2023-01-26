@@ -2,9 +2,9 @@
 name: module4_task2
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   schedule:
-    - cron: '30 00 * * *'
+    - cron: "0 0 * * *"
   pull_request:
     types: [opened, reopened, edited, ready_for_review]
 
