@@ -1,4 +1,4 @@
-# Module 1: Introduction to DevOps: Automate Everything to Focus on What Really Matters
+Introduction to DevOps: Automate Everything to Focus on What Really Matters
 
 ## Learning Objectives
 
@@ -92,7 +92,3 @@ Post | Create a new blog post whose filename and title come from the environment
 * lint: ## to execute a static analysis to lint this code.
 * @shellcheck setup.sh >/dev/null 2>&1 || echo "Lint Failed"
 * lint	Lints the shell script setup.sh and on success runs make yamllint and lints markdown FILES
-
-
-## Author
-Karren - [Github https://github.com/klmana ]
